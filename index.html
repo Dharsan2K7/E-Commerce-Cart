@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern E-Commerce Cart</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg,#f7f8f9,#fcfcfc);
+    min-height:100vh;
+    padding:30px;
+    color:rgb(1, 1, 1);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:25px;
+    font-size:38px;
+}
+
+.container{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:25px;
+}
+
+.products{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:rgba(255,255,255,0.08);
+    border-radius:18px;
+    padding:20px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px) scale(1.03);
+}
+
+.card img{
+    width:100%;
+    height:150px;
+    object-fit:cover;
+    border-radius:15px;
+    margin-bottom:12px;
+}
+
+.card h3{
+    margin-bottom:8px;
+}
+
+.price{
+    color:#000000;
+    font-size:20px;
+    margin-bottom:12px;
+}
+
+button{
+    border:none;
+    padding:10px 16px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.add-btn{
+    background : #d4e486;
+    color:#000;
+    width:100%;
+}
+
+.add-btn:hover{
+    background:#000000;
+    color : #d4e486;
+}
+
+.cart{
+    background:rgba(255,255,255,0.08);
+    padding:20px;
+    border-radius:18px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+    height:fit-content;
+}
+
+.cart h2{
+    margin-bottom:15px;
+}
+
+.cart-item{
+    background:rgba(255,255,255,0.08);
+    padding:12px;
+    border-radius:12px;
+    margin-bottom:12px;
+}
+
+.qty-box{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+}
+
+.qty-btn{
+    background:#d4e486;
+    color:black;
+    width:28px;
+    height:28px;
+    border-radius:50%;
+}
+
+.remove{
+    background:#ff4b5c;
+    color:white;
+    margin-top:10px;
+    width:100%;
+}
+
+.total{
+    font-size:24px;
+    margin-top:15px;
+    color:#000000;
+    font-weight:700;
+}
+
+.clear{
+    width:100%;
+    margin-top:15px;
+    background:#ffaa00;
+}
+
+.empty{
+    text-align:center;
+    opacity:0.7;
+    padding:20px;
+}
+
+@media(max-width:900px){
+    .container{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+<body>
+
+<h1>🛒 Modern Shopping Cart</h1>
+
+<div class="container">
+
+<div class="products" id="productList"></div>
+
+<div class="cart">
+    <h2>Cart Items</h2>
+    <div id="cartItems"></div>
+    <div class="total" id="total">Total: ₹0</div>
+    <button class="clear" onclick="clearCart()">Clear Cart</button>
+</div>
+
+</div>
+
+<script>
+const products = [
+{ id:1, name:"Headphones", price:1999, img:"https://cdn.thewirecutter.com/wp-content/media/2023/07/bluetoothheadphones-2048px-0876.jpg"},
+{ id:2, name:"Keyboard", price:1499, img:"https://cdn.thewirecutter.com/wp-content/media/2024/11/bluetooth-keyboard-2048px-4346-3x2-1.jpg?auto=webp&quality=75&crop=3:2&width=1024"},
+{ id:3, name:"Mouse", price:899, img:"https://cdn.thewirecutter.com/wp-content/media/2025/09/BEST-WIRELESS-MOUSE-9297-2x1-1.jpg?width=2048&quality=75&crop=2:1&auto=webp"},
+{ id:4, name:"Laptop Bag", price:2299, img:"https://genietravel.com/cdn/shop/files/45-Degree-Angle-2-_28_1200x.jpg?v=1771499569"},
+{ id:5, name:"Smart Watch", price:3499, img:"https://www.pebblecart.com/cdn/shop/files/1_2_7d412075-ae0d-4afb-9eef-ddd17573e6a8.jpg?v=1758190819&width=500"},
+{ id:6, name:"Speaker", price:2799, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSq7fIKmu3VI4cTpEfUtnRq0DduqJRBCBU8_w&s"}
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function saveCart(){
+    localStorage.setItem("cart",JSON.stringify(cart));
+}
+
+function showProducts(){
+    let html="";
+    products.forEach(p=>{
+        html+=`
+        <div class="card">
+            <img src="${p.img}">
+            <h3>${p.name}</h3>
+            <div class="price">₹${p.price}</div>
+            <button class="add-btn" onclick="addToCart(${p.id})">Add to Cart</button>
+        </div>
+        `;
+    });
+    document.getElementById("productList").innerHTML=html;
+}
+
+function addToCart(id){
+    let item = cart.find(x=>x.id===id);
+    if(item){
+        item.qty++;
+    }else{
+        let product = products.find(x=>x.id===id);
+        cart.push({...product, qty:1});
+    }
+    saveCart();
+    displayCart();
+}
+
+function displayCart(){
+    let area=document.getElementById("cartItems");
+    let total=0;
+
+    if(cart.length===0){
+        area.innerHTML='<div class="empty">Your cart is empty</div>';
+        document.getElementById("total").innerText="Total: ₹0";
+        return;
+    }
+
+    let html="";
+    cart.forEach((item,index)=>{
+        total += item.price * item.qty;
+
+        html+=`
+        <div class="cart-item">
+            <b>${item.name}</b><br>
+            ₹${item.price}
+            <div class="qty-box">
+                <button class="qty-btn" onclick="changeQty(${index},-1)">-</button>
+                <span>${item.qty}</span>
+                <button class="qty-btn" onclick="changeQty(${index},1)">+</button>
+            </div>
+            <button class="remove" onclick="removeItem(${index})">Remove</button>
+        </div>
+        `;
+    });
+
+    area.innerHTML=html;
+    document.getElementById("total").innerText="Total: ₹"+total;
+}
+
+function changeQty(index,val){
+    cart[index].qty += val;
+    if(cart[index].qty<=0) cart.splice(index,1);
+    saveCart();
+    displayCart();
+}
+
+function removeItem(index){
+    cart.splice(index,1);
+    saveCart();
+    displayCart();
+}
+
+function clearCart(){
+    cart=[];
+    saveCart();
+    displayCart();
+}
+
+showProducts();
+displayCart();
+</script>
+
+</body>
+</html>
